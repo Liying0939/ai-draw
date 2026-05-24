@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽签</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 30px;
+        }
+        .draw-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .draw-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .draw-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result-box {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            line-height: 2;
+            font-size: 16px;
+            color: #374151;
+            display: none;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+        .result-label {
+            color: #6b7280;
+        }
+        .result-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+        .tip {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        .reset-btn {
+            margin-top: 20px;
+            background: #f3f4f6;
+            color: #6b7280;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="title">🤖 抽签</div>
+        <button class="draw-btn" id="drawBtn">点击抽取</button>
+        
+        <div class="result-box" id="resultBox">
+            <div class="result-item">
+                <span class="result-label">所属赛道</span>
+                <span class="result-value" id="groupName"></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">你的身份</span>
+                <span class="result-value" id="roleName"></span>
+            </div>
+            <div class="tip">请前往对应桌号就座</div>
+        </div>
+
+        <button class="reset-btn" id="resetBtn" onclick="resetAll()">重置抽签（管理员用）</button>
+    </div>
+
+    <script>
+        // 可自定义修改：5个赛道分组
+        const GROUPS = [
+            "AI基础研究组",
+            "AI产业应用组", 
+            "AI风险治理组",
+            "AI效率工具组",
+            "AI创新实践组"
+        ];
+
+        // 可自定义修改：6个身份
+        const ROLES = [
+            "算法工程师",
+            "产品经理",
+            "合规专家",
+            "效率专家",
+            "创业合伙人",
+            "发言人"
+        ];
+
+        // 自动计数，保证分组完全均匀
+        function getCount() {
+            return parseInt(localStorage.getItem('ai_group_count') || 0);
+        }
+
+        function saveCount(count) {
+            localStorage.setItem('ai_group_count', count);
+        }
+
+        const drawBtn = document.getElementById('drawBtn');
+        const resultBox = document.getElementById('resultBox');
+        const groupName = document.getElementById('groupName');
+        const roleName = document.getElementById('roleName');
+
+        drawBtn.addEventListener('click', function() {
+            let count = getCount();
+            // 自动均匀分配：5个组循环，6个身份循环
+            let group = GROUPS[count % GROUPS.length];
+            let role = ROLES[count % ROLES.length];
+            
+            // 显示结果
+            groupName.textContent = group;
+            roleName.textContent = role;
+            resultBox.style.display = 'block';
+            
+            // 计数+1，保证下一个人自动分配下一组
+            saveCount(count + 1);
+            
+            // 禁止重复抽签
+            drawBtn.disabled = true;
+            drawBtn.textContent = "已完成抽签";
+        });
+
+        // 管理员重置，下一场培训用
+        function resetAll() {
+            if(confirm("确定要重置所有抽签记录吗？")) {
+                localStorage.removeItem('ai_group_count');
+                drawBtn.disabled = false;
+                drawBtn.textContent = "点击抽取身份";
+                resultBox.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
