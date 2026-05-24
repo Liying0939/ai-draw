@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>抽签</title>
+    <title>AI身份抽签</title>
     <style>
         * {
             margin: 0;
@@ -97,8 +97,8 @@
 </head>
 <body>
     <div class="card">
-        <div class="title">🤖 抽签</div>
-        <button class="draw-btn" id="drawBtn">点击抽取</button>
+        <div class="title">🤖 身份抽签</div>
+        <button class="draw-btn" id="drawBtn">点击抽取你的身份</button>
         
         <div class="result-box" id="resultBox">
             <div class="result-item">
@@ -112,11 +112,14 @@
             <div class="tip">请前往对应桌号就座</div>
         </div>
 
-        <button class="reset-btn" id="resetBtn" onclick="resetAll()">重置抽签（管理员用）</button>
+        <button class="reset-btn" id="resetBtn">重置抽签（管理员用）</button>
     </div>
 
     <script>
-        // 可自定义修改：5个赛道分组
+        // 在这里设置你的管理员密码，改成你自己的就行
+        const ADMIN_PASSWORD = "HL159753";
+
+        // 5个赛道分组
         const GROUPS = [
             "AI基础研究组",
             "AI产业应用组", 
@@ -125,7 +128,7 @@
             "AI创新实践组"
         ];
 
-        // 可自定义修改：6个身份
+        // 6个身份
         const ROLES = [
             "算法工程师",
             "产品经理",
@@ -135,7 +138,6 @@
             "发言人"
         ];
 
-        // 自动计数，保证分组完全均匀
         function getCount() {
             return parseInt(localStorage.getItem('ai_group_count') || 0);
         }
@@ -148,35 +150,38 @@
         const resultBox = document.getElementById('resultBox');
         const groupName = document.getElementById('groupName');
         const roleName = document.getElementById('roleName');
+        const resetBtn = document.getElementById('resetBtn');
 
         drawBtn.addEventListener('click', function() {
             let count = getCount();
-            // 自动均匀分配：5个组循环，6个身份循环
             let group = GROUPS[count % GROUPS.length];
             let role = ROLES[count % ROLES.length];
             
-            // 显示结果
             groupName.textContent = group;
             roleName.textContent = role;
             resultBox.style.display = 'block';
             
-            // 计数+1，保证下一个人自动分配下一组
             saveCount(count + 1);
             
-            // 禁止重复抽签
             drawBtn.disabled = true;
             drawBtn.textContent = "已完成抽签";
         });
 
-        // 管理员重置，下一场培训用
-        function resetAll() {
-            if(confirm("确定要重置所有抽签记录吗？")) {
-                localStorage.removeItem('ai_group_count');
-                drawBtn.disabled = false;
-                drawBtn.textContent = "点击抽取身份";
-                resultBox.style.display = 'none';
+        // 加密码保护的重置
+        resetBtn.addEventListener('click', function() {
+            let pwd = prompt("请输入管理员密码：");
+            if(pwd === ADMIN_PASSWORD) {
+                if(confirm("确定重置所有抽签记录吗？")) {
+                    localStorage.removeItem('ai_group_count');
+                    drawBtn.disabled = false;
+                    drawBtn.textContent = "点击抽取你的身份";
+                    resultBox.style.display = 'none';
+                    alert("重置成功！");
+                }
+            } else if(pwd !== null) {
+                alert("密码错误，无权重置！");
             }
-        }
+        });
     </script>
 </body>
 </html>
